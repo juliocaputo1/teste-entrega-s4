@@ -1,0 +1,39 @@
+version: '3.9'
+
+services: 
+  api:
+    container_name: express-entrega-sprint-3-m4
+    image: api_express 
+    build: .
+    ports: 
+      - 3000:3000
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  db:
+    container_name: db-entrega-sprint-3-m4
+    image: postgres:latest
+    ports: 
+     - 5431:5432
+    environment:
+      - POSTGRES_USER=julio
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=users_database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U julio -d users_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - ./create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - products_management:/var/lib/postgresql/data
+
+volumes:
+  products_management:
+    driver: local
